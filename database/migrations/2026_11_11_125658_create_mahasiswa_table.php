@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('prodi')->nullable();
             $table->string('angkatan')->nullable();
             $table->string('email')->unique()->nullable();
+            $table->text('alamat')->nullable();
             $table->timestamps();
         });
     }
