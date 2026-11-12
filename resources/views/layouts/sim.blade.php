@@ -210,10 +210,12 @@
                 Data Mahasiswa
             </a>
 
-            <a href="{{ route('prodi.index') }}"
-               class="{{ request()->routeIs('prodi.*') ? 'active' : '' }}">
-                Program Studi
-            </a>
+            @if (\Illuminate\Support\Facades\Route::has('prodi.index'))
+                <a href="{{ route('prodi.index') }}"
+                class="{{ request()->routeIs('prodi.*') ? 'active' : '' }}">
+                    Program Studi
+                </a>
+            @endif
 
         </nav>
 
