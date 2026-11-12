@@ -1,260 +1,184 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard SIM</title>
+@extends('layouts.sim')
 
-    <style>
-        * {
-            box-sizing: border-box;
+@section('title', 'Dashboard')
+
+@section('content')
+
+<style>
+    .dashboard-heading {
+        margin-bottom: 25px;
+    }
+
+    .dashboard-heading h1 {
+        font-size: 25px;
+        margin: 0 0 8px;
+    }
+
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .dashboard-stat {
+        background: #ffffff;
+        border: 1px solid #e1e7ef;
+        border-radius: 9px;
+        padding: 25px;
+    }
+
+    .stat-label {
+        color: #718096;
+        font-size: 14px;
+    }
+
+    .stat-number {
+        color: #1e3a5f;
+        font-size: 32px;
+        font-weight: bold;
+        margin-top: 12px;
+    }
+
+    .dashboard-panel {
+        background: #ffffff;
+        border: 1px solid #e1e7ef;
+        border-radius: 9px;
+        padding: 25px;
+    }
+
+    .dashboard-panel h3 {
+        font-size: 18px;
+        margin: 0 0 8px;
+    }
+
+    .distribution-item {
+        margin-top: 25px;
+    }
+
+    .distribution-info {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .progress-track {
+        width: 100%;
+        height: 10px;
+        background: #e8edf3;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-value {
+        height: 100%;
+        background: #315f91;
+        border-radius: 10px;
+    }
+
+    .empty-state {
+        padding: 30px;
+        background: #f7f9fc;
+        text-align: center;
+        border-radius: 7px;
+        color: #718096;
+        margin-top: 20px;
+    }
+
+    @media(max-width: 650px) {
+        .dashboard-stats {
+            grid-template-columns: 1fr;
         }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            color: #263449;
+        .distribution-info {
+            flex-direction: column;
         }
+    }
+</style>
 
-        .navbar {
-            background: #1e3a5f;
-            color: white;
-            padding: 20px 6%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+<div class="dashboard-heading">
+    <h1>Dashboard</h1>
 
-        .navbar h2 {
-            margin: 0;
-            font-size: 20px;
-        }
+    <p class="muted">
+        Ringkasan informasi dan statistik Sistem Informasi Mahasiswa.
+    </p>
+</div>
 
-        .navbar nav {
-            display: flex;
-            gap: 24px;
-        }
+<div class="dashboard-stats">
 
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-        }
+    <div class="dashboard-stat">
+        <div class="stat-label">Total Mahasiswa</div>
 
-        .container {
-            max-width: 1200px;
-            margin: 38px auto;
-            padding: 0 24px;
-        }
+        <div class="stat-number">
+            {{ number_format($totalMahasiswa) }}
+        </div>
+    </div>
 
-        .heading {
-            margin-bottom: 28px;
-        }
+    <div class="dashboard-stat">
+        <div class="stat-label">Total Program Studi</div>
 
-        .heading h1 {
-            margin: 0 0 8px;
-            font-size: 27px;
-        }
+        <div class="stat-number">
+            {{ number_format($totalProdi) }}
+        </div>
+    </div>
 
-        .heading p {
-            color: #758195;
-            margin: 0;
-            font-size: 14px;
-        }
+</div>
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
+<div class="dashboard-panel">
 
-        .stat-card, .panel {
-            background: white;
-            border: 1px solid #e3e8ef;
-            border-radius: 9px;
-            padding: 24px;
-        }
+    <h3>Sebaran Mahasiswa per Program Studi</h3>
 
-        .stat-title {
-            color: #718096;
-            font-size: 14px;
-        }
+    <p class="muted">
+        Statistik jumlah mahasiswa berdasarkan program studi.
+    </p>
 
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            margin-top: 14px;
-            color: #1e3a5f;
-        }
+    @forelse($mahasiswaPerProdi as $item)
 
-        .panel h3 {
-            margin: 0 0 8px;
-            font-size: 18px;
-        }
+        @php
+            $persentase = $totalMahasiswa > 0
+                ? round(($item->total / $totalMahasiswa) * 100)
+                : 0;
+        @endphp
 
-        .panel-description {
-            color: #788497;
-            font-size: 13px;
-            margin-bottom: 25px;
-        }
+        <div class="distribution-item">
 
-        .prodi-item {
-            margin-bottom: 24px;
-        }
+            <div class="distribution-info">
+                <strong>{{ $item->prodi }}</strong>
 
-        .prodi-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 9px;
-        }
+                <span>
+                    {{ $item->total }} Mahasiswa
+                    ({{ $persentase }}%)
+                </span>
+            </div>
 
-        .bar-background {
-            width: 100%;
-            height: 10px;
-            border-radius: 10px;
-            background: #e8edf3;
-            overflow: hidden;
-        }
+            <div class="progress-track">
+                <div class="progress-value"
+                     style="width: {{ $persentase }}%;">
+                </div>
+            </div>
 
-        .bar-fill {
-            height: 100%;
-            background: #315f91;
-            border-radius: 10px;
-        }
-
-        .empty-state {
-            padding: 25px;
-            text-align: center;
-            background: #f8fafc;
-            color: #788497;
-            border-radius: 7px;
-            font-size: 14px;
-        }
-
-        footer {
-            text-align: center;
-            color: #8792a3;
-            font-size: 13px;
-            padding: 25px;
-        }
-
-        @media (max-width: 650px) {
-            .navbar {
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .navbar nav {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <header class="navbar">
-        <h2>SIM | Sistem Informasi Mahasiswa</h2>
-
-        <nav>
-            <a href="{{ route('sim.dashboard') }}">Dashboard</a>
-            <a href="{{ url('/mahasiswa') }}">Data Mahasiswa</a>
-            <a href="{{ url('/prodi') }}">Program Studi</a>
-        </nav>
-    </header>
-
-    <main class="container">
-
-        <div class="heading">
-            <h1>Dashboard</h1>
-            <p>Ringkasan informasi dan statistik data mahasiswa.</p>
         </div>
 
-        <!-- Statistik Utama -->
-        <section class="stats">
+    @empty
 
-            <div class="stat-card">
-                <div class="stat-title">
-                    Total Mahasiswa
-                </div>
+        <div class="empty-state">
+            <strong>Belum Ada Data Mahasiswa</strong>
 
-                <div class="stat-number">
-                    {{ number_format($totalMahasiswa) }}
-                </div>
-            </div>
+            <p>
+                Tambahkan data mahasiswa untuk melihat statistik program studi.
+            </p>
 
-            <div class="stat-card">
-                <div class="stat-title">
-                    Total Program Studi
-                </div>
+            <a href="{{ route('mahasiswa.create') }}"
+               class="btn primary">
+                Tambah Mahasiswa
+            </a>
+        </div>
 
-                <div class="stat-number">
-                    {{ number_format($totalProdi) }}
-                </div>
-            </div>
+    @endforelse
 
-        </section>
+</div>
 
-        <!-- Sebaran Mahasiswa -->
-        <section class="panel">
-
-            <h3>Sebaran Mahasiswa per Program Studi</h3>
-
-            <div class="panel-description">
-                Statistik jumlah mahasiswa berdasarkan program studi.
-            </div>
-
-            @forelse($mahasiswaPerProdi as $item)
-
-                @php
-                    $persentase = $totalMahasiswa > 0
-                        ? round(($item->total / $totalMahasiswa) * 100)
-                        : 0;
-                @endphp
-
-                <div class="prodi-item">
-
-                    <div class="prodi-info">
-                        <span>{{ $item->prodi }}</span>
-
-                        <strong>
-                            {{ $item->total }} Mahasiswa
-                            ({{ $persentase }}%)
-                        </strong>
-                    </div>
-
-                    <div class="bar-background">
-                        <div class="bar-fill"
-                             style="width: {{ $persentase }}%;">
-                        </div>
-                    </div>
-
-                </div>
-
-            @empty
-
-                <div class="empty-state">
-                    Belum ada data mahasiswa berdasarkan program studi.
-                </div>
-
-            @endforelse
-
-        </section>
-
-    </main>
-
-    <footer>
-        Sistem Informasi Mahasiswa &copy; {{ date('Y') }}
-    </footer>
-
-</body>
-</html>
+@endsection
